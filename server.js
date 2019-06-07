@@ -19,6 +19,9 @@ app.use(express.static(__dirname + '/public'));
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/index.html');
 });
+app.get('/webhooksLog', function (req, res) {
+    res.sendfile(__dirname + "/webhooksLog.txt");
+});
 
 // POST method route
 app.post('/', function (req, res) {
@@ -33,7 +36,7 @@ app.post('/', function (req, res) {
             // Getting the webhook and broadcasting it across Socket.IO to the client
             var data = JSON.stringify(req.body.value);
             console.log(JSON.stringify(req.body.value))
-            //io.emit('list:changes', data);
+            io.emit('list:changes', data);
             const fileName = __dirname + '/webhooksLog.txt';
             // Keeping track of every webhooks
             // Write changes in a file

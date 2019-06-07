@@ -23,7 +23,7 @@
         });
 
         function _readLog() {
-            $.get('/webhooksLog.txt', function (data) {
+            $.get('/webhooksLog', function (data) {
                 $('#Log').html(data.substring(0, 2500));
             });
         }
