@@ -25,6 +25,18 @@ app.get('/webhooksLog', function (req, res) {
 
 // POST method route
 app.post('/', function (req, res) {
+    const wblog = __dirname + '/webhooksLog.txt';
+    fs.exists(wblog, (exists) => {
+        let fileData = "";
+        if (exists) {
+            fileData = fs.readFileSync(wblog, 'utf8');
+        }
+        let txtFile = "";
+        txtFile += `<b>Retrieved</b>: ${m().toISOString()}</br>`;
+        txtFile += JSON.stringify(req.body);
+        fileData = txtFile + '</br></br>' + fileData;
+        fs.writeFileSync(wblog, fileData, { encoding: 'utf8' });
+    });
     if (req.query && req.query.validationtoken) {
         // Validating the webhooks subscription
         console.log('Found validation token: ', req.query.validationtoken);
