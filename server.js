@@ -22,6 +22,12 @@ app.get('/', function (req, res) {
 app.get('/consumer.js', function (req, res) {
     res.sendfile(__dirname + '/consumer.js');
 });
+app.get('/terminal', function (req, res) {
+    res.sendfile(__dirname + '/terminal.txt');
+});
+app.get('/terminal.html', function (req, res) {
+    res.sendfile(__dirname + '/terminal.html');
+});
 app.get('/webhooksLog', function (req, res) {
     res.sendfile(__dirname + "/webhooksLog.txt");
 });
@@ -75,13 +81,13 @@ app.post('/', function (req, res) {
                 var spawn = require("child_process").spawn,child;
                 child = spawn("powershell.exe",[`./siteProvision.ps1 -SiteAlias ${SiteAlias} -ItemID ${itemID}`]);
                 child.stdout.on("data",function(data){
-                    io.emit('console:output', data.toString());
+                    addToFile("terminal.txt", data.toString())
                 });
                 child.stderr.on("data",function(data){
-                    io.emit('console:error', data.toString());
+                    addToFile("terminal.txt", data.toString())
                 });
                 child.on("exit",function(){
-                    io.emit('console:output', 'finished');
+                    addToFile("terminal.txt", "----------  END -----------")
                 });
                 child.stdin.end(); //end input
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -94,3 +100,19 @@ app.post('/', function (req, res) {
         }
     }
 });
+
+var addToFile = (fileName, text) => {
+    
+    fileName = __dirname + '/terminal.txt';
+    fs.exists(fileName, (exists) => {
+        let fileData = "";
+        if (exists) {
+            fileData = fs.readFileSync(fileName, 'utf8');
+        }
+        let txtFile = text || "";
+        fileData = txtFile + '</br></br>' + fileData;
+        fs.writeFileSync(fileName, fileData, { encoding: 'utf8' });
+        return true;
+    });
+    return false;
+}
