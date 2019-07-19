@@ -19,6 +19,9 @@ app.use(express.static(__dirname + '/public'));
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/index.html');
 });
+app.get('/consumer.js', function (req, res) {
+    res.sendfile(__dirname + '/consumer.js');
+});
 app.get('/webhooksLog', function (req, res) {
     res.sendfile(__dirname + "/webhooksLog.txt");
 });
@@ -67,8 +70,27 @@ app.post('/', function (req, res) {
             });
         }
         else{
-            res.writeHead(404, { 'Content-Type': 'text/plain' });
-            res.end("Not Found")
+            if (typeof req.body.customize !== "undefined" && req.body.customize !== null){
+                let {itemID, SiteAlias} = req.body;
+                var spawn = require("child_process").spawn,child;
+                child = spawn("powershell.exe",[`./siteProvision.ps1 -SiteAlias ${SiteAlias} -ItemID ${itemID}`]);
+                child.stdout.on("data",function(data){
+                    io.emit('console:output', data.toString());
+                });
+                child.stderr.on("data",function(data){
+                    io.emit('console:error', data.toString());
+                });
+                child.on("exit",function(){
+                    io.emit('console:output', 'finished');
+                });
+                child.stdin.end(); //end input
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end("Criado")
+            }
+            else{
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end("Not Found")
+            }
         }
     }
 });
