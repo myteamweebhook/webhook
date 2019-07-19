@@ -9,6 +9,8 @@ Param(
 
 $usr = "admin@inparlabsdev.onmicrosoft.com"
 $pwd = "123@mudar"
+Write-Host 'Alive'
+exit
 
 $encPwd = ConvertTo-SecureString -String $pwd -AsPlainText -force
 $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $usr,$encPwd
