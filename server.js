@@ -8,6 +8,15 @@ var io = require('socket.io')(server);
 var fs = require('fs')
 var m = require('moment')
 
+let Subscriptions = {
+    Solicitacao: {
+        Id: "b9e9e532-c8c3-42c2-a179-b3efac1aa0a5"
+    },
+    Criacao: {
+        Id: "b76d35d3-758b-4626-a7b3-52252b008b52"
+    }
+}
+
 server.listen(port, undefined, () => {
     console.log("listening");
 });
@@ -57,7 +66,12 @@ app.post('/', function (req, res) {
             // Getting the webhook and broadcasting it across Socket.IO to the client
             var data = JSON.stringify(req.body.value);
             console.log(JSON.stringify(req.body.value))
-            io.emit('list:changes', data);
+            if (data && data.value && data.value[0]){
+                if (data.value[0].subscriptionId == Subscriptions.Criacao.Id)
+                    io.emit('new_team', data);
+                if (data.value[0].subscriptionId == Subscriptions.Solicitacao.Id)
+                    io.emit('team_request', data);
+            }
             const fileName = __dirname + '/webhooksLog.txt';
             // Keeping track of every webhooks
             // Write changes in a file
@@ -74,29 +88,6 @@ app.post('/', function (req, res) {
                 res.writeHead(200, { 'Content-Type': 'text/plain' });
                 res.end("Inserido")
             });
-        }
-        else{
-            if (typeof req.body.customize !== "undefined" && req.body.customize !== null){
-                let {itemID, SiteAlias} = req.body;
-                var spawn = require("child_process").spawn,child;
-                child = spawn("powershell.exe",[`./siteProvision.ps1 -SiteAlias ${SiteAlias} -ItemID ${itemID}`]);
-                child.stdout.on("data",function(data){
-                    addToFile("terminal.txt", data.toString())
-                });
-                child.stderr.on("data",function(data){
-                    addToFile("terminal.txt", data.toString())
-                });
-                child.on("exit",function(){
-                    addToFile("terminal.txt", "----------  END -----------")
-                });
-                child.stdin.end(); //end input
-                res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end("Criado")
-            }
-            else{
-                res.writeHead(404, { 'Content-Type': 'text/plain' });
-                res.end("Not Found")
-            }
         }
     }
 });
