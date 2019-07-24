@@ -64,30 +64,17 @@ app.post('/', function (req, res) {
     else {
         if (typeof req.body.value !== "undefined" && req.body.value !== null) {
             // Getting the webhook and broadcasting it across Socket.IO to the client
-            var data = JSON.stringify(req.body.value);
+            var data = req.body.value;
+            var dataString = JSON.stringify(req.body.value);
             console.log(JSON.stringify(req.body.value))
-            if (data && data.value && data.value[0]){
-                if (data.value[0].subscriptionId == Subscriptions.Criacao.Id)
-                    io.emit('new_team', data);
-                if (data.value[0].subscriptionId == Subscriptions.Solicitacao.Id)
-                    io.emit('team_request', data);
+            if (data[0]){
+                if (data[0].subscriptionId == Subscriptions.Criacao.Id)
+                    io.emit('new_team', dataString);
+                if (data[0].subscriptionId == Subscriptions.Solicitacao.Id)
+                    io.emit('team_request', dataString);
             }
-            const fileName = __dirname + '/webhooksLog.txt';
-            // Keeping track of every webhooks
-            // Write changes in a file
-            fs.exists(fileName, (exists) => {
-                let fileData = "";
-                if (exists) {
-                    fileData = fs.readFileSync(fileName, 'utf8');
-                }
-                let txtFile = "";
-                txtFile += `<b>Retrieved</b>: ${m().toISOString()}</br>`;
-                txtFile += JSON.stringify(data);
-                fileData = txtFile + '</br></br>' + fileData;
-                fs.writeFileSync(fileName, fileData, { encoding: 'utf8' });
-                res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end("Inserido")
-            });
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end("Recebido");
         }
     }
 });
