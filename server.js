@@ -14,6 +14,9 @@ let Subscriptions = {
     },
     Criacao: {
         Id: "b76d35d3-758b-4626-a7b3-52252b008b52"
+    },
+    Comunicados: {
+        Id: "3a91d20f-f36a-4148-a6dc-a1e57e60bec4"
     }
 }
 
@@ -72,6 +75,8 @@ app.post('/', function (req, res) {
                     io.emit('new_team', dataString);
                 if (data[0].subscriptionId == Subscriptions.Solicitacao.Id)
                     io.emit('team_request', dataString);
+                if (data[0].subscriptionId == Subscriptions.Comunicados.Id)
+                    io.emit('news', dataString);
             }
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end("Recebido");
